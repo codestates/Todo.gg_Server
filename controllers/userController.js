@@ -128,6 +128,16 @@ module.exports = {
       }
       userInfo=verifyToken(cookieToken);
     }
+    //엑세스 토큰 재발급
+    const accesstoken = jwt.sign({
+      email:userInfo.email,
+      profile:userInfo.profile,
+      username:userInfo.username,
+      createdAt:userInfo.createdAt,
+      updatedAt:userInfo.updatedAt,
+      iat:Math.floor(Date.now() / 1000),
+      exp:Math.floor(Date.now() / 1000) + (60 * 60*24)
+    },process.env.ACCESS_SECRET);
 
     //3. DB 조작
     const deleteUserInfo = await user.destroy({
@@ -140,7 +150,7 @@ module.exports = {
     if(!deleteUserInfo){
       res.status(404).send({message : "Not Delete"})
     } else {
-      res.status(200).send({message : "Good!"})
+      res.status(200).send({data: {accesstoken: accesstoken}, message: 'ok' })
     }
   },
   
